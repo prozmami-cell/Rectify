@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Recify</title>
+<meta name="description" content="Fişin fotoğrafını çek, kasaya otomatik işlensin.">
+<meta name="theme-color" content="#F3F6FB">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Recify">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div id="uygulama" class="kabuk">
+  <aside class="yan" aria-label="Kenar menü">
+    <div class="marka"><img src="icons/icon-192.png" alt="" width="38" height="38"><img src="icons/wordmark.png" alt="Recify" class="marka-yazi"></div>
+    <nav class="yan-menu" aria-label="Ana menü">
+      <a href="#kasa" data-gorunum="kasa"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Kasa</a>
+      <a href="#fisler" data-gorunum="fisler"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>Fişler</a>
+      <a href="#raporlar" data-gorunum="raporlar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Raporlar</a>
+      <a href="#ayarlar" data-gorunum="ayarlar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>Ayarlar</a>
+    </nav>
+    <div class="yan-kasa">
+      <span class="etiket-kucuk">KASA</span>
+      <a href="#ayarlar" class="yan-kasa-ad"><span class="nokta"></span><span data-kasa-adi>Şantiye Kasası</span></a>
+    </div>
+  </aside>
+
+  <main class="ana">
+    <p id="banner" class="uyari kotu" hidden></p>
+    <section id="v-kasa" class="gorunum" hidden></section>
+    <section id="v-fisler" class="gorunum" hidden></section>
+    <section id="v-raporlar" class="gorunum" hidden></section>
+    <section id="v-ayarlar" class="gorunum" hidden></section>
+  </main>
+
+  <nav class="alt-menu" aria-label="Ana menü">
+    <a href="#kasa" data-gorunum="kasa"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Kasa</a>
+    <a href="#raporlar" data-gorunum="raporlar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Raporlar</a>
+    <label for="kameraGirdi" class="tara-btn" aria-label="Fiş tara"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10"/></svg></label>
+    <a href="#fisler" data-gorunum="fisler"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>Fişler</a>
+    <a href="#ayarlar" data-gorunum="ayarlar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>Ayarlar</a>
+  </nav>
+</div>
+
+<div id="kontrol" class="kontrol-perde" hidden role="dialog" aria-modal="true" aria-labelledby="kontrolBaslik">
+  <div class="kontrol">
+    <div class="k-foto">
+      <header class="k-ust">
+        <button type="button" class="ikon-btn koyu" id="kontrolKapat" aria-label="Kapat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+        <h2 id="kontrolBaslik">Fişi kontrol et</h2>
+        <label for="kameraGirdi" class="ikon-btn koyu" id="kontrolYeniden" aria-label="Yeniden çek"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg></label>
+      </header>
+      <div class="k-resim" id="kResimKutu">
+        <img id="kResim" alt="Fiş fotoğrafı">
+        <div class="k-cerceve" aria-hidden="true"></div>
+        <span class="k-durum" id="kDurum" hidden></span>
+      </div>
+    </div>
+    <form class="k-form" id="kForm" novalidate>
+      <div class="tutar-satir">
+        <label class="tutar-alan"><span>Tutar</span><input id="fTutar" inputmode="decimal" autocomplete="off" placeholder="0,00 ₺"></label>
+        <div class="odeme" role="group" aria-label="Ödeme" id="fOdeme">
+          <button type="button" data-v="kart">Kart</button>
+          <button type="button" data-v="nakit">Nakit</button>
+          <button type="button" data-v="gelen">Gelen</button>
+        </div>
+      </div>
+      <div class="ikili">
+        <label class="alan" data-alan="tarih"><span>Tarih</span><input id="fTarih" type="date" required></label>
+        <label class="alan" data-alan="evrakTipi"><span>Evrak tipi</span><select id="fEvrakTipi"></select></label>
+        <label class="alan" data-alan="evrakNo"><span>Evrak no</span><input id="fEvrakNo" inputmode="numeric" autocomplete="off"></label>
+        <label class="alan" data-alan="kategori"><span>Kategori</span><select id="fKategori"></select></label>
+      </div>
+      <label class="alan" data-alan="firma"><span>Firma</span><input id="fFirma" autocomplete="off"></label>
+      <label class="alan vurgu" data-alan="aciklama"><span id="aciklamaEtiket">Açıklama · senin yazman gerekiyor</span><textarea id="fAciklama" rows="2" placeholder="Örn. 4 ADET KAHVALTI ÖDEMESİ"></textarea></label>
+      <p class="uyari" id="kUyari" hidden></p>
+      <div class="k-alt">
+        <button type="button" class="btn tehlike" id="kSil" hidden>Sil</button>
+        <button type="submit" class="btn birincil genis buyuk" id="kKaydet"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>Kasaya kaydet</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<input type="file" id="kameraGirdi" class="gizli-girdi" accept="image/*" capture="environment">
+<input type="file" id="galeriGirdi" class="gizli-girdi" accept="image/*" multiple>
+<input type="file" id="iceAktarGirdi" class="gizli-girdi" accept=".zip,application/zip">
+<div id="toast" class="toast" role="status" hidden></div>
+<div id="birak" class="birak" hidden><div>Fiş fotoğraflarını bırakın</div></div>
+
+<script src="vendor/exceljs.min.js" defer></script>
+<script src="vendor/jszip.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js" defer></script>
+<script src="okuma.js" defer></script>
+<script src="app.js" defer></script>
+</body>
+</html>
