@@ -1,6 +1,6 @@
 // Recify servis çalışanı: uygulama dosyalarını önbelleğe alır, böylece uygulama hızlı ve internetsiz açılır.
 // Kayıtlar ve fotoğraflar cihazın kendi veritabanında (IndexedDB) durur.
-const SURUM = "recify-v4";
+const SURUM = "recify-v5";
 const DOSYALAR = [
   "./", "index.html", "app.css", "app.js", "okuma.js", "acilis.js", "manifest.webmanifest",
   "vendor/exceljs.min.js", "vendor/jszip.min.js",

@@ -214,11 +214,13 @@ function camKonumla() {
     const etkin = menu.querySelector('[aria-current="page"]');
     if (!cam || !etkin) return;
     const m = menu.getBoundingClientRect();
-    const hedef = menu.classList.contains("alt-menu") ? etkin.querySelector("svg") : etkin;
-    const r = hedef.getBoundingClientRect();
+    const alt = menu.classList.contains("alt-menu");
+    // Alt menüde simge ve altındaki menü adı birlikte camın içinde kalır
+    let r = etkin.getBoundingClientRect();
+    if (alt) { const aralik = document.createRange(); aralik.selectNodeContents(etkin); r = aralik.getBoundingClientRect(); }
     if (!r.width) return;
-    const g = menu.classList.contains("alt-menu") ? r.width + 22 : r.width;
-    const y = menu.classList.contains("alt-menu") ? r.height + 14 : r.height;
+    const g = alt ? r.width + 20 : r.width;
+    const y = alt ? r.height + 10 : r.height;
     cam.style.width = g + "px";
     cam.style.height = y + "px";
     cam.style.transform = `translate(${r.left - m.left + (r.width - g) / 2}px, ${r.top - m.top + (r.height - y) / 2}px)`;
