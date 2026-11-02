@@ -253,6 +253,12 @@ tbody tr:hover { background: #F8FAFF; }
 .k-alt { margin-top: auto; padding-top: 6px; display: flex; gap: 10px; }
 .k-alt .btn.tehlike { min-height: 54px; border-radius: 16px; }
 
+/* Açılış animasyonu */
+html:has(.acilis), body:has(.acilis) { overflow: hidden; }
+.acilis { position: fixed; inset: 0; z-index: 100; background: #FFFFFF; display: grid; place-items: center; overflow: hidden; cursor: pointer; }
+.acilis-zoom { position: absolute; inset: 0; display: grid; place-items: center; will-change: transform, opacity; backface-visibility: hidden; }
+.acilis svg { width: min(86vw, 440px); height: auto; max-height: 82vh; aspect-ratio: 696 / 960; fill: none; stroke: none; stroke-width: 0; }
+
 /* Bildirim ve sürükle-bırak */
 .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(100px + env(safe-area-inset-bottom)); z-index: 50; background: var(--murekkep); color: #fff; padding: 10px 16px; border-radius: 12px; font-size: 14px; font-weight: 700; box-shadow: var(--golge); max-width: calc(100% - 32px); text-align: center; }
 .birak { position: fixed; inset: 0; z-index: 40; background: rgba(10,42,122,.55); display: grid; place-items: center; pointer-events: none; }

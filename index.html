@@ -15,10 +15,75 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Manrope:wght@500;600;700;800&family=Lexend:wght@700&display=swap">
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
+<!-- Açılış animasyonu (design/recify-splash.html) -->
+<div id="acilis" class="acilis" aria-hidden="true">
+  <div id="zoom" class="acilis-zoom">
+  <svg id="stage" viewBox="420 30 696 960" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#00e8ff"/>
+        <stop offset="0.38" stop-color="#0a6cf2"/>
+        <stop offset="0.75" stop-color="#0a2a8a"/>
+        <stop offset="1" stop-color="#0a3fa6"/>
+      </linearGradient>
+      <radialGradient id="glow" cx="0.95" cy="0.95" r="0.35">
+        <stop offset="0" stop-color="#00e5ff" stop-opacity=".95"/>
+        <stop offset="1" stop-color="#00e5ff" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="shine" cx="0.1" cy="0.05" r="0.75">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".18"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="line" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#0a84ff"/>
+        <stop offset="1" stop-color="#00d4ff"/>
+      </linearGradient>
+      <linearGradient id="leg" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#bfe6ff"/>
+        <stop offset="0.35" stop-color="#ffffff"/>
+      </linearGradient>
+      <linearGradient id="dot" x1="0" y1="1" x2="1" y2="0">
+        <stop offset="0" stop-color="#00d4ff"/>
+        <stop offset="1" stop-color="#0a84ff"/>
+      </linearGradient>
+      <!-- fiş R'nin üst çubuğunun altından çıksın -->
+      <clipPath id="printClip">
+        <rect x="380" y="292" width="780" height="400"/>
+      </clipPath>
+    </defs>
+    <g id="logo" style="transform-box: view-box; transform-origin: 768px 375px;">
+      <g id="tile" style="transform-box: view-box; transform-origin: 768px 375px; opacity:0">
+        <rect x="495" y="118" width="546" height="516" rx="130" fill="url(#bg)"/>
+        <rect x="495" y="118" width="546" height="516" rx="130" fill="url(#glow)"/>
+        <path d="M495 400 C540 240 700 135 900 125 L625 118 C560 118 495 175 495 248 Z" fill="#ffffff" opacity=".12"/>
+        <rect x="495" y="118" width="546" height="516" rx="130" fill="url(#shine)"/>
+      </g>
+      <rect id="slit" x="580" y="286" width="285" height="10" rx="5" fill="#061542" style="opacity:0"/>
+      <path id="R" pathLength="1"
+        d="M632 228 L850 228 C915 228 958 280 958 338 C958 388 925 425 882 438 L957 522 L878 525 C868 525 860 520 856 515 L790 432 L800 397 C803 390 808 386 815 386 L835 386 C862 386 885 365 885 338 C885 312 862 291 838 291 L688 291 C683 291 679 289 677 286 Z"
+        fill="url(#leg)" fill-opacity="0" stroke="#ffffff" stroke-width="5" stroke-linejoin="round"
+        stroke-dasharray="1 1" stroke-dashoffset="1"/>
+      <g clip-path="url(#printClip)">
+        <g id="receipt" style="transform: translateY(-232px)">
+          <path d="M672 323 L828 323 C838 323 846 325 846 328 C820 336 802 370 792 402 L771 472 C764 495 757 508 751 513 L740 500 L728 513 L708 500 L686 513 L664 500 L642 513 L620 500 L598 513 L568 513 C580 494 590 470 600 440 L616 393 C629 350 646 323 672 323 Z" fill="#ffffff"/>
+          <rect x="646" y="361" width="122" height="17" rx="8.5" fill="url(#line)"/>
+          <rect x="634" y="396" width="120" height="17" rx="8.5" fill="url(#line)"/>
+          <rect x="622" y="431" width="117" height="17" rx="8.5" fill="url(#line)"/>
+        </g>
+      </g>
+      <g id="word" style="opacity:0">
+        <text id="wordText" x="768" y="838" text-anchor="middle" font-family="Lexend, sans-serif" font-weight="700" font-size="196" letter-spacing="-4" fill="#0b1d4a">Recıfy</text>
+        <path id="idot" d="M0 0" fill="url(#dot)"/>
+      </g>
+    </g>
+  </svg>
+  </div>
+</div>
+
 <div id="uygulama" class="kabuk">
   <aside class="yan" aria-label="Kenar menü">
     <div class="marka"><img src="icons/icon-192.png" alt="" width="38" height="38"><img src="icons/wordmark.png" alt="Recify" class="marka-yazi"></div>
@@ -97,6 +162,7 @@
 <div id="toast" class="toast" role="status" hidden></div>
 <div id="birak" class="birak" hidden><div>Fiş fotoğraflarını bırakın</div></div>
 
+<script src="acilis.js"></script>
 <script src="vendor/exceljs.min.js" defer></script>
 <script src="vendor/jszip.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js" defer></script>

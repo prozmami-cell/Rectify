@@ -1,8 +1,8 @@
 // Recify servis çalışanı: uygulama dosyalarını önbelleğe alır, böylece uygulama hızlı ve internetsiz açılır.
 // Kayıtlar ve fotoğraflar cihazın kendi veritabanında (IndexedDB) durur.
-const SURUM = "recify-v2";
+const SURUM = "recify-v3";
 const DOSYALAR = [
-  "./", "index.html", "app.css", "app.js", "okuma.js", "manifest.webmanifest",
+  "./", "index.html", "app.css", "app.js", "okuma.js", "acilis.js", "manifest.webmanifest",
   "vendor/exceljs.min.js", "vendor/jszip.min.js",
   "icons/icon-192.png", "icons/icon-512.png", "icons/maskable-512.png", "icons/apple-touch-icon.png",
   "icons/favicon-32.png", "icons/wordmark.png",
