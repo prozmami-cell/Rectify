@@ -79,10 +79,25 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
 .yan { display: none; }
 .ana { padding: max(18px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) calc(110px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); max-width: 640px; margin: 0 auto; }
 .gorunum { display: flex; flex-direction: column; gap: 16px; }
-.alt-menu { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; background: var(--yuzey); border-top: 1px solid var(--cizgi); display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: center; padding: 6px max(8px, env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)); }
+.ana { position: relative; overflow-x: hidden; overflow-x: clip; }
+.alt-menu { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; background: rgba(255, 255, 255, .78); -webkit-backdrop-filter: blur(18px) saturate(180%); backdrop-filter: blur(18px) saturate(180%); border-top: 1px solid rgba(226, 232, 242, .9); display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: center; padding: 6px max(8px, env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)); }
 .alt-menu a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 48px; text-decoration: none; color: var(--soluk); font-size: 11px; font-weight: 700; }
+.alt-menu a { position: relative; z-index: 1; }
 .alt-menu a[aria-current="page"] { color: var(--mavi); font-weight: 800; }
-.alt-menu svg { width: 22px; height: 22px; }
+.alt-menu svg { width: 22px; height: 22px; transition: transform .3s cubic-bezier(.34, 1.4, .64, 1); }
+.alt-menu a[aria-current="page"] svg { transform: scale(1.08); }
+
+/* Bulunulan menüyü gösteren cam kabarcık: simgeden biraz büyük, menü değişince kayar */
+.cam {
+  position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 0; pointer-events: none; opacity: 0;
+  border-radius: 14px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, .85) 0%, rgba(214, 232, 255, .55) 55%, rgba(0, 198, 242, .18) 100%);
+  -webkit-backdrop-filter: blur(10px) saturate(170%); backdrop-filter: blur(10px) saturate(170%);
+  border: 1px solid rgba(255, 255, 255, .9);
+  box-shadow: 0 8px 18px -8px rgba(10, 102, 255, .55), 0 1px 3px rgba(10, 42, 122, .10), inset 0 1px 0 rgba(255, 255, 255, .95), inset 0 -1px 2px rgba(10, 102, 255, .14);
+}
+.cam.hazir { opacity: 1; transition: transform .42s cubic-bezier(.34, 1.36, .64, 1), width .3s ease, height .3s ease, opacity .2s; }
+@media (prefers-reduced-motion: reduce) { .cam.hazir { transition: opacity .2s; } .gorunum { animation: none !important; } }
 .tara-btn { justify-self: center; width: 64px; height: 64px; margin-top: -34px; border-radius: 22px; background: var(--gradyan); color: #fff; display: grid; place-items: center; border: 4px solid var(--zemin); box-shadow: 0 12px 26px -8px rgba(10,102,255,.65); }
 .tara-btn svg { width: 28px; height: 28px; stroke-width: 2.2; }
 
@@ -271,9 +286,11 @@ html:has(.acilis), body:has(.acilis) { overflow: hidden; }
   .yan .marka { padding: 0 6px; }
   .yan .marka img:first-child { width: 38px; height: 38px; border-radius: 11px; }
   .yan .marka-yazi { height: 23px; }
-  .yan-menu { display: flex; flex-direction: column; gap: 4px; }
-  .yan-menu a { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 12px; color: #3E4B68; font-weight: 700; font-size: 14px; text-decoration: none; }
-  .yan-menu a[aria-current="page"] { background: var(--mavi-acik); color: var(--mavi-koyu); font-weight: 800; }
+  .yan-menu { display: flex; flex-direction: column; gap: 4px; position: relative; }
+  .yan-menu a { position: relative; z-index: 1; display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 12px; color: #3E4B68; font-weight: 700; font-size: 14px; text-decoration: none; transition: color .2s; }
+  .yan-menu a:hover:not([aria-current="page"]) { background: rgba(10, 102, 255, .05); }
+  .yan-menu a[aria-current="page"] { color: var(--mavi-koyu); font-weight: 800; }
+  .yan-menu .cam { border-radius: 13px; }
   .yan-kasa { margin-top: auto; display: flex; flex-direction: column; gap: 8px; }
   .yan-kasa select { border: 1px solid var(--cizgi); background: var(--yuzey-2); border-radius: 12px; padding: 0 10px; min-height: 48px; font-weight: 800; font-size: 13px; }
   .ana { max-width: none; margin: 0; padding: 26px 32px 40px; }

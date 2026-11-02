@@ -157,16 +157,73 @@ async function yukle() {
 }
 
 /* ---------- Yönlendirme ---------- */
+// Menülerin ekrandaki sırası; kayma yönü buna göre seçilir
+const SIRA_TEL = ["kasa", "raporlar", "fisler", "ayarlar"];
+const SIRA_MASA = ["kasa", "fisler", "raporlar", "ayarlar"];
+let ilkRota = true;
+
 function rotayiUygula() {
+  const onceki = st.gorunum;
   const h = location.hash.replace("#", "");
-  st.gorunum = ["kasa", "fisler", "raporlar", "ayarlar"].includes(h) ? h : "kasa";
+  st.gorunum = SIRA_TEL.includes(h) ? h : "kasa";
   $$("[data-gorunum]").forEach((a) => {
     if (a.dataset.gorunum === st.gorunum) a.setAttribute("aria-current", "page");
     else a.removeAttribute("aria-current");
   });
-  $$(".gorunum").forEach((s) => { s.hidden = s.id !== "v-" + st.gorunum; });
+  const eski = $("#v-" + onceki), yeni = $("#v-" + st.gorunum);
+  const hareket = !ilkRota && onceki !== st.gorunum && yeni.animate && !matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (hareket) {
+    const sira = masaustu() ? SIRA_MASA : SIRA_TEL;
+    kaydir(eski, yeni, sira.indexOf(st.gorunum) > sira.indexOf(onceki) ? 1 : -1);
+  } else {
+    $$(".gorunum").forEach((s) => { s.hidden = s !== yeni; });
+    ciz();
+    window.scrollTo(0, 0);
+  }
+  ilkRota = false;
+  camKonumla();
+}
+
+// Eski ekran bir yana kayarak çıkar, yenisi öbür yandan kayarak girer.
+function kaydir(eski, yeni, yon) {
+  yeni.getAnimations().forEach((a) => a.cancel());
+  yeni.removeAttribute("style");
+  // Eski ekranı bulunduğu yerde sabitle (sayfa en üste kaydırılınca zıplamasın)
+  const ust = eski.offsetTop - window.scrollY;
+  Object.assign(eski.style, { position: "absolute", top: ust + "px", left: eski.offsetLeft + "px", width: eski.offsetWidth + "px", pointerEvents: "none" });
+  $$(".gorunum").forEach((s) => { if (s !== eski && s !== yeni) s.hidden = true; });
+  yeni.hidden = false;
   ciz();
   window.scrollTo(0, 0);
+  const secenek = { duration: 340, easing: "cubic-bezier(.22, .8, .25, 1)" };
+  const cikis = eski.animate([
+    { transform: "translateX(0)", opacity: 1 },
+    { transform: `translateX(${-yon * 32}%)`, opacity: 0 },
+  ], { ...secenek, fill: "forwards" });
+  cikis.onfinish = () => { eski.hidden = true; eski.removeAttribute("style"); cikis.cancel(); };
+  yeni.animate([
+    { transform: `translateX(${yon * 32}%)`, opacity: 0 },
+    { transform: "translateX(0)", opacity: 1 },
+  ], secenek);
+}
+
+// Cam kabarcığı etkin menünün altına taşır: alt menüde simgeden biraz büyük, kenar menüde satır boyunda.
+function camKonumla() {
+  $$(".alt-menu, .yan-menu").forEach((menu) => {
+    const cam = menu.querySelector(".cam");
+    const etkin = menu.querySelector('[aria-current="page"]');
+    if (!cam || !etkin) return;
+    const m = menu.getBoundingClientRect();
+    const hedef = menu.classList.contains("alt-menu") ? etkin.querySelector("svg") : etkin;
+    const r = hedef.getBoundingClientRect();
+    if (!r.width) return;
+    const g = menu.classList.contains("alt-menu") ? r.width + 22 : r.width;
+    const y = menu.classList.contains("alt-menu") ? r.height + 14 : r.height;
+    cam.style.width = g + "px";
+    cam.style.height = y + "px";
+    cam.style.transform = `translate(${r.left - m.left + (r.width - g) / 2}px, ${r.top - m.top + (r.height - y) / 2}px)`;
+    if (!cam.classList.contains("hazir")) requestAnimationFrame(() => cam.classList.add("hazir"));
+  });
 }
 
 function ciz() {
@@ -882,6 +939,8 @@ function olaylariBagla() {
     const zip = [...e.dataTransfer.files].find((f) => /\.zip$/i.test(f.name));
     if (zip) iceAktar(zip); else fotolarGeldi(e.dataTransfer.files);
   });
+  window.addEventListener("resize", () => camKonumla());
+  document.fonts?.ready?.then(() => camKonumla());
   window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); st.kurulumOlayi = e; if (st.gorunum === "ayarlar") ciz(); });
 }
 
