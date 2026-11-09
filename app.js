@@ -467,7 +467,7 @@ function cizRaporlar() {
       </section>
       <section class="kart" style="gap:10px">
         <h2>Şirkete gönder</h2>
-        <button type="button" class="disa koyu" data-eylem="excel"><span class="ikon" style="background:rgba(0,198,242,.18);color:#5FDDFB">${IKON.excel}</span><span class="metin"><b>Excel kasa dosyası</b><small>${esc(dosyaAdi(trUpper(st.kasaAdi)))}.xlsx · tüm aylar</small></span>${IKON.indir}</button>
+        <button type="button" class="disa koyu" data-eylem="excel"><span class="ikon" style="background:rgba(0,198,242,.18);color:#5FDDFB">${IKON.excel}</span><span class="metin"><b>Excel kasa dosyası</b><small>${esc(dosyaAdi(trUpper(st.kasaAdi) + " " + sayfaAdi(st.ay)))}.xlsx</small></span>${IKON.indir}</button>
         <button type="button" class="disa" data-eylem="zip"><span class="ikon" style="background:#E3F8FD;color:#00708F">${IKON.galeri}</span><span class="metin"><b>Fiş fotoğrafları</b><small>${ayAdi(st.ay)} · ${fotoSayisi} fotoğraf · ZIP</small></span>${IKON.indir}</button>
         <p class="not">Telefonda paylaşım menüsü açılır; WhatsApp ya da e-postayla doğrudan gönderebilirsin. Fotoğraf adları Excel'deki Sıra No ile başlar.</p>
       </section>
@@ -769,8 +769,12 @@ const kenar = { style: "thin", color: { argb: XL.cizgi } };
 const KENAR = { top: kenar, left: kenar, bottom: kenar, right: kenar };
 const q = (ad) => "'" + ad.replace(/'/g, "''") + "'";
 
-async function excelOlustur() {
-  const gruplar = aylarListesi().map((key) => ({ key, ad: sayfaAdi(key), rows: ayKayitlari(key) })).filter((g) => g.rows.length || g.key === ayKey(bugun()));
+// Her ay ayrı bir Excel dosyası: Özet + o ayın sayfası. Önceki ayların nakit bakiyesi Özet'te "devreden" olarak taşınır.
+async function excelOlustur(ay) {
+  const gruplar = [{ key: ay, ad: sayfaAdi(ay), rows: ayKayitlari(ay) }];
+  const once = toplamlar(st.kayitlar.filter((k) => ayKey(k.tarih) < ay));
+  const devir = Math.round((once.gelen - once.nakit) * 100) / 100;
+  const DEVIR = q("Özet ve Rapor") + "!$C$8";
   const wb = new ExcelJS.Workbook();
   wb.creator = "Recify";
   wb.calcProperties.fullCalcOnLoad = true;
@@ -780,7 +784,7 @@ async function excelOlustur() {
   KATEGORILER.forEach((v, i) => { ayar.getCell(i + 1, 2).value = v; });
 
   const aralik = (ad, kol) => q(ad) + "!$" + kol + "$2:$" + kol + "$" + SATIR;
-  gruplar.forEach((g, gi) => {
+  gruplar.forEach((g) => {
     const ws = wb.addWorksheet(g.ad, { views: [{ state: "frozen", ySplit: 1, topLeftCell: "A2", activeCell: "A2" }] });
     [10, 11, 15.55, 14.89, 22.33, 70, 40, 18, 18, 20, 22.11].forEach((w, i) => { ws.getColumn(i + 1).width = w; });
     const bas = ws.getRow(1); bas.height = 30;
@@ -792,9 +796,7 @@ async function excelOlustur() {
       c.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
       c.border = KENAR;
     });
-    // Bakiye önceki ayların nakit hareketlerini de taşır; kartlı (boş) satırlar formülü bozmaz.
-    const oncekiH = gruplar.slice(0, gi).map((o) => aralik(o.ad, "H"));
-    const oncekiI = gruplar.slice(0, gi).map((o) => aralik(o.ad, "I"));
+    // Bakiye, Özet'teki devreden nakitten başlar; kartlı (boş) satırlar formülü bozmaz.
     for (let r = 2; r <= SATIR; r++) {
       const k = g.rows[r - 2];
       const row = ws.getRow(r); row.height = 15;
@@ -810,7 +812,7 @@ async function excelOlustur() {
         k && sayi(k.gelen) ? sayi(k.gelen) : null,
         k && sayi(k.nakit) ? sayi(k.nakit) : null,
         k && sayi(k.kart) ? sayi(k.kart) : null,
-        { formula: `IF(AND(H${r}="",I${r}=""),"",SUM(${[...oncekiH, "$H$2:H" + r].join(",")})-SUM(${[...oncekiI, "$I$2:I" + r].join(",")}))` },
+        { formula: `IF(AND(H${r}="",I${r}=""),"",${DEVIR}+SUM($H$2:H${r})-SUM($I$2:I${r}))` },
       ];
       deg.forEach((v, i) => {
         const c = row.getCell(i + 1);
@@ -831,7 +833,7 @@ async function excelOlustur() {
   ozet.mergeCells("B2:C2");
   ozet.getRow(2).height = 30;
   const baslik = ozet.getCell("B2");
-  baslik.value = trUpper(st.kasaAdi) + " ÖZETİ";
+  baslik.value = trUpper(st.kasaAdi) + " " + sayfaAdi(ay) + " ÖZETİ";
   baslik.font = { name: "Segoe UI", size: 18, bold: true, color: { argb: XL.beyaz } };
   baslik.fill = { type: "pattern", pattern: "solid", fgColor: { argb: XL.lacivert } };
   baslik.alignment = { horizontal: "center", vertical: "middle" };
@@ -839,14 +841,15 @@ async function excelOlustur() {
   [
     [4, "Toplam Gelen Nakit (Merkezden vs.):", topla("H"), false],
     [5, "Toplam Nakit Harcama (Kasadan Çıkan):", topla("I"), false],
-    [6, "Kalan Nakit Bakiye:", "C4-C5", true],
+    [6, "Kalan Nakit Bakiye:", "C8+C4-C5", true],
     [7, "Toplam Kredi Kartı Harcaması:", topla("J"), false],
+    [8, "Önceki Aylardan Devreden Nakit:", null, false],
   ].forEach(([r, etiket, f, kirmizi]) => {
     ozet.getRow(r).height = 19.2;
     const l = ozet.getCell("B" + r), v = ozet.getCell("C" + r);
     l.value = etiket;
     l.font = { name: "Segoe UI", size: 12, bold: true, color: { argb: kirmizi ? "FFC00000" : "FF333333" } };
-    v.value = { formula: f };
+    v.value = f ? { formula: f } : devir;
     v.numFmt = XL.para;
     v.font = { name: "Segoe UI", size: kirmizi ? 14 : 12, bold: true, color: { argb: kirmizi ? "FFC00000" : "FF000000" } };
     v.alignment = { horizontal: "right" };
@@ -857,8 +860,10 @@ async function excelOlustur() {
 
 async function excelIndir(btn) {
   if (!window.ExcelJS) { toast("Excel aracı yükleniyor, birkaç saniye sonra tekrar dene."); return; }
+  const ay = st.ay;
+  if (!ayKayitlari(ay).length) { toast(ayAdi(ay) + " için kayıt yok. Excel'i indirmek istediğin ayı seç."); return; }
   btn.disabled = true;
-  try { const b = await excelOlustur(); await dosyaVer(b, dosyaAdi(trUpper(st.kasaAdi)) + ".xlsx", b.type, "Excel kasa dosyası indirildi"); }
+  try { const b = await excelOlustur(ay); await dosyaVer(b, dosyaAdi(trUpper(st.kasaAdi) + " " + sayfaAdi(ay)) + ".xlsx", b.type, "Excel kasa dosyası indirildi"); }
   catch { toast("Excel oluşturulamadı."); }
   finally { btn.disabled = false; }
 }
