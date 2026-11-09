@@ -274,6 +274,11 @@ html:has(.acilis), body:has(.acilis) { overflow: hidden; }
 .acilis { position: fixed; inset: 0; z-index: 100; background: #FFFFFF; display: grid; place-items: center; overflow: hidden; cursor: pointer; }
 .acilis-zoom { position: absolute; inset: 0; display: grid; place-items: center; will-change: transform, opacity; backface-visibility: hidden; }
 .acilis svg { width: min(86vw, 440px); height: auto; max-height: 82vh; aspect-ratio: 696 / 960; fill: none; stroke: none; stroke-width: 0; }
+/* Yazı tipi gelip animasyon başlayana kadar logo gizli; sonra parçalar tek tek gelir */
+.acilis:not(.oynuyor) #logo { opacity: 0; }
+.acilis #tile, .acilis #R, .acilis #receipt, .acilis #idot, .acilis .ln, .acilis .glyph, .acilis #sweep, .acilis-zoom { will-change: transform, opacity; }
+.acilis #R, .acilis #receipt, .acilis #idot, .acilis .ln, .acilis .glyph { transform-box: fill-box; transform-origin: center; }
+.acilis .ln { transform-origin: left center; }
 
 /* Bildirim ve sürükle-bırak */
 .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(100px + env(safe-area-inset-bottom)); z-index: 50; background: var(--murekkep); color: #fff; padding: 10px 16px; border-radius: 12px; font-size: 14px; font-weight: 700; box-shadow: var(--golge); max-width: calc(100% - 32px); text-align: center; }
