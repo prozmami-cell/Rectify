@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="tr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Recify — Yeni açılış</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}body{margin:0;background:white;color:#0B1D4A;font-family:system-ui,sans-serif}main{min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px 16px}.phone{position:relative;width:min(340px,86vw,38svh);aspect-ratio:9/19.5;border:8px solid #0B1D4A;border-radius:40px;overflow:hidden;background:white;isolation:isolate;box-shadow:0 18px 60px #0B1D4A14}#zoom{position:absolute;inset:0;pointer-events:none}svg{width:100%;height:100%;display:block}#logo,#word{transform-box:view-box;transform-origin:768px 375px}.app{position:absolute;inset:0;opacity:0;padding:40px 18px 20px;background:white}.eyebrow{font-size:10px;letter-spacing:.16em;text-transform:uppercase}h1{font-size:24px;margin:6px 0 24px;letter-spacing:-.05em}.balance{padding:22px 16px;border-radius:20px;background:linear-gradient(135deg,#00C6F2,#0A6CF2 58%,#0A2A8A);color:white}.balance p{font-size:12px;margin:0 0 12px}.balance strong{font-size:27px}.section{font-size:12px;margin-top:26px}.row{display:flex;align-items:center;gap:10px;padding:16px 0;border-bottom:1px solid #0B1D4A12}.icon{padding:9px;border-radius:10px;background:#0A66FF0D;color:#0A66FF}.row div{flex:1}.row b,.row small{display:block;font-size:11px}.row small{font-size:9px;opacity:.55;margin-top:4px}.row strong{font-size:11px}.add{margin-top:24px;padding:12px;border-radius:13px;background:#0A66FF;color:white;text-align:center;font-size:12px}.controls{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}button{padding:11px 19px;border:1px solid #0A66FF;border-radius:99px;background:#0A66FF;color:white;font:600 13px system-ui;cursor:pointer}button.ghost{background:white;color:#0B1D4A;border-color:#0B1D4A30}button:focus-visible{outline:3px solid #00C6F2;outline-offset:4px}.hint{font-size:11px;opacity:.65;text-align:center;margin:0}@media(prefers-reduced-motion:reduce){#zoom{display:none}.app{opacity:1}}
+
+#tile,#R,#receipt,#paperFlex,#idot,.ln,.glyph,#sweep,#zoom,.app{will-change:transform,opacity}
+#R,#receipt,#idot,.ln,.glyph{transform-box:fill-box;transform-origin:center}
+#paperFlex{transform-box:view-box;transform-origin:750px 323px}
+.ln{transform-origin:left center}
+</style>
+<main>
+<div class="phone" role="img" aria-label="Recify açılışı ve örnek uygulama ekranı">
+<div class="app" id="app"><p class="eyebrow">Recify</p><h1>Fişlerim</h1><div class="balance"><p>Bu ayki harcamaların</p><strong>₺4.280,50</strong></div><p class="section">Son eklenenler</p><div class="row"><span class="icon">▤</span><div><b>Market alışverişi</b><small>Bugün · 12.45</small></div><strong>₺842,50</strong></div><div class="row"><span class="icon">▤</span><div><b>Kahve molası</b><small>Dün · 09.30</small></div><strong>₺145,00</strong></div><div class="add">＋ Yeni fiş ekle</div></div>
+<div id="zoom"><svg id="stage" viewBox="420 30 696 960" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#00e8ff"/>
+        <stop offset="0.38" stop-color="#0a6cf2"/>
+        <stop offset="0.75" stop-color="#0a2a8a"/>
+        <stop offset="1" stop-color="#0A2A7A"/>
+      </linearGradient>
+      <radialGradient id="glow" cx="0.95" cy="0.95" r="0.35">
+        <stop offset="0" stop-color="#00E8FF" stop-opacity=".95"/>
+        <stop offset="1" stop-color="#00E8FF" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="shine" cx="0.1" cy="0.05" r="0.75">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".18"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="line" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#0A66FF"/>
+        <stop offset="1" stop-color="#00C6F2"/>
+      </linearGradient>
+      <linearGradient id="leg" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#ffffff"/>
+        <stop offset="0.35" stop-color="#ffffff"/>
+      </linearGradient>
+      <linearGradient id="unused" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#0A2A8A"/>
+        <stop offset="1" stop-color="#0b1d4a"/>
+      </linearGradient>
+      <linearGradient id="dot" x1="0" y1="1" x2="1" y2="0">
+        <stop offset="0" stop-color="#00C6F2"/>
+        <stop offset="1" stop-color="#0A66FF"/>
+      </linearGradient>
+      <linearGradient id="flash"><stop stop-color="#ffffff" stop-opacity="0"/><stop offset=".5" stop-color="#ffffff" stop-opacity=".6"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></linearGradient>
+<clipPath id="tileClip"><rect x="495" y="118" width="546" height="516" rx="130"/></clipPath>
+<clipPath id="printClip">
+        <rect x="380" y="292" width="780" height="400"/>
+      </clipPath>
+    </defs>
+    <g id="logo" style="transform-box: view-box; transform-origin: 768px 375px;">
+      <g id="tile" style="transform-box: view-box; transform-origin: 768px 375px; opacity:1">
+        <rect x="495" y="118" width="546" height="516" rx="130" fill="url(#bg)"/>
+        <rect x="495" y="118" width="546" height="516" rx="130" fill="url(#glow)"/>
+        <path d="M495 400 C540 240 700 135 900 125 L625 118 C560 118 495 175 495 248 Z" fill="#ffffff" opacity=".12"/>
+        <rect x="495" y="118" width="546" height="516" rx="130" fill="url(#shine)"/>
+      </g>
+      <path id="R" pathLength="1"
+        d="M632 228 L850 228 C915 228 958 280 958 338 C958 388 925 425 882 438 L957 522 L878 525 C868 525 860 520 856 515 L790 432 L800 397 C803 390 808 386 815 386 L835 386 C862 386 885 365 885 338 C885 312 862 291 838 291 L688 291 C683 291 679 289 677 286 Z"
+        fill="url(#leg)" fill-opacity="1" stroke="#ffffff" stroke-width="0" stroke-linejoin="round"
+        stroke-dasharray="1 1" stroke-dashoffset="1"/>
+      <g clip-path="url(#printClip)">
+        <g id="receipt" style="transform: translateY(0px)">
+          <g id="paperFlex">
+          <g id="paper">
+            <path d="M672 323 L828 323 C838 323 846 325 846 328 C820 336 802 370 792 402 L771 472 C764 495 757 508 751 513 L740 500 L728 513 L708 500 L686 513 L664 500 L642 513 L620 500 L598 513 L568 513 C580 494 590 470 600 440 L616 393 C629 350 646 323 672 323 Z"
+              fill="#ffffff"/>
+          </g>
+          <rect class="ln" x="646" y="361" width="122" height="17" rx="8.5" fill="url(#line)"/>
+          <rect class="ln" x="634" y="396" width="120" height="17" rx="8.5" fill="url(#line)"/>
+          <rect class="ln" x="622" y="431" width="117" height="17" rx="8.5" fill="url(#line)"/>
+          </g>
+        </g>
+      </g>
+<g clip-path="url(#tileClip)"><g id="sweep" opacity="0"><path d="M400 118 L510 118 L740 634 L630 634 Z" fill="url(#flash)"/></g></g>
+      <g id="word" style="opacity:1">
+        <text id="wordText" x="768" y="838" text-anchor="middle"
+              font-family="Lexend, sans-serif" font-weight="700" font-size="196"
+              letter-spacing="-4" fill="#0b1d4a">Recıfy</text>
+        <path id="idot" d="M0 0" fill="url(#dot)"/>
+      </g>
+    </g>
+  </svg></div>
+</div>
+<div class="controls"><button id="replay" type="button">Tekrar oynat</button><button id="slow" class="ghost" type="button">Yavaş çekim</button></div>
+<p class="hint" id="status" role="status">1,9 saniye · Akıcı giriş</p>
+</main>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  const animations = [];
+  function placeDot() {
+    // Eski önizlemedeki eğik nokta geometrisi aynen korunur.
+    try {
+      const b = $('wordText').getExtentOfChar(3);
+      const cx = b.x + b.width / 2 + 6, top = b.y + b.height * .24;
+      $('idot').setAttribute('d', `M${cx-28} ${top+18} L${cx+4} ${top-8} L${cx+30} ${top+4} L${cx-2} ${top+32} Z`);
+    } catch (_) {}
+  }
+  function letters() {
+    const source = $('wordText'), ns = 'http://www.w3.org/2000/svg';
+    document.querySelectorAll('.glyph,.glyphClip').forEach(el => el.remove());
+    source.style.opacity = '1';
+    for (let i=0;i<source.textContent.length;i++) {
+      const b=source.getExtentOfChar(i), clip=document.createElementNS(ns,'clipPath');
+      clip.id='clip'+i; clip.setAttribute('class','glyphClip');
+      clip.setAttribute('clipPathUnits','userSpaceOnUse');
+      const rect=document.createElementNS(ns,'rect');
+      for(const [k,v] of Object.entries({x:b.x,y:b.y-8,width:b.width,height:b.height+16})) rect.setAttribute(k,v);
+      clip.append(rect); $('stage').querySelector('defs').append(clip);
+      const group=document.createElementNS(ns,'g'), window=document.createElementNS(ns,'g');
+      group.id='glyph'+i; group.setAttribute('class','glyph');
+      window.setAttribute('clip-path','url(#'+clip.id+')');
+      const copy=source.cloneNode(true); copy.removeAttribute('id');
+      window.append(copy); group.append(window); $('word').insertBefore(group,$('idot'));
+    }
+    source.style.opacity='0';
+  }
+  function play(rate = 1) {
+    animations.splice(0).forEach(a => a.cancel());
+    placeDot();
+    if (reduced.matches) {
+      $('zoom').style.display = 'none';
+      $('app').style.opacity = '1';
+      $('status').textContent = 'Azaltılmış hareket açık · Animasyon atlandı';
+      return;
+    }
+    $('zoom').style.display = '';
+    $('app').style.opacity = '';
+    $('status').textContent = rate === 1 ? '1,9 saniye · Akıcı giriş' : 'Yavaş çekim · 0,35× · 5,43 saniye';
+    const start = document.timeline.currentTime;
+    function animate(id, frames, delay, duration, easing) {
+      const a = $(id).animate(frames, {delay, duration, fill:'both', easing});
+      a.playbackRate = rate;
+      a.startTime = start;
+      animations.push(a);
+    }
+    letters();
+    // 0-420: tile burst and spring recoil.
+    animate('tile', [
+      {opacity:0,transform:'translateY(90px) rotate(-16deg) scale(.12)'},
+      {opacity:1,transform:'translateY(-24px) rotate(5deg) scale(1.13,.94)',offset:.52},
+      {transform:'translateY(8px) rotate(-2deg) scale(.96,1.04)',offset:.78},
+      {transform:'translateY(0) rotate(0) scale(1)'}
+    ],0,420,'cubic-bezier(.22,.8,.3,1)');
+    // 140-500: R sweep.
+    animate('R',[
+      {opacity:0,transform:'translateX(-185px) skewX(-18deg) scaleX(.65)'},
+      {opacity:1,transform:'translateX(16px) skewX(4deg) scaleX(1.04)',offset:.67},
+      {opacity:1,transform:'translateX(0) skewX(0) scaleX(1)'}
+    ],140,360,'cubic-bezier(.16,1,.3,1)');
+    // 220-440: feed downward through the invisible printClip edge at y=292.
+    // The paper bottom starts at 513-232=281, fully above the clip.
+    // Finish before the existing line reveals begin at 440 ms.
+    animate('receipt',[
+      {transform:'translateY(-232px)'},
+      {transform:'translateY(0)'}
+    ],220,220,'steps(12, end)');
+    // 220-650: flex around the paper's top; the lines travel with the sheet.
+    // Small feed vibrations give way to two diminishing settling swings.
+    animate('paperFlex',[
+      {transform:'translateY(0) rotate(0) skewX(0) scaleY(1)',offset:0},
+      {transform:'translateY(.35px) rotate(.65deg) skewX(-.4deg) scaleY(.997)',offset:40/430},
+      {transform:'translateY(-.3px) rotate(-.85deg) skewX(.55deg) scaleY(1.004)',offset:75/430},
+      {transform:'translateY(.4px) rotate(1deg) skewX(-.65deg) scaleY(.996)',offset:110/430},
+      {transform:'translateY(-.3px) rotate(-.75deg) skewX(.5deg) scaleY(1.003)',offset:145/430},
+      {transform:'translateY(.3px) rotate(.85deg) skewX(-.55deg) scaleY(.998)',offset:180/430},
+      {transform:'translateY(0) rotate(-1.05deg) skewX(.65deg) scaleY(1.012)',offset:220/430},
+      {transform:'translateY(0) rotate(.6deg) skewX(-.4deg) scaleY(.994)',offset:275/430},
+      {transform:'translateY(0) rotate(-.28deg) skewX(.18deg) scaleY(1.004)',offset:330/430},
+      {transform:'translateY(0) rotate(.1deg) skewX(-.06deg) scaleY(.999)',offset:380/430},
+      {transform:'translateY(0) rotate(0) skewX(0) scaleY(1)',offset:1}
+    ],220,430,'ease-in-out');
+    document.querySelectorAll('.ln').forEach((line,i)=>{
+      line.id='line'+i;
+      animate(line.id,[{opacity:0,transform:'scaleX(0)'},{opacity:1,transform:'scaleX(1)'}],440+i*65,180,'cubic-bezier(.16,1,.3,1)');
+    });
+    // 380-935: individually staggered glyph hops; original text paths preserved.
+    for(let i=0;i<$('wordText').textContent.length;i++) {
+      animate('glyph'+i,[
+        {opacity:0,transform:'translate(22px,65px) rotate(9deg) scale(.75)'},
+        {opacity:1,transform:'translate(0,-13px) rotate(-3deg) scale(1.04)',offset:.58},
+        {transform:'translate(0,5px) rotate(1deg) scale(.98)',offset:.8},
+        {transform:'translate(0,0) rotate(0) scale(1)'}
+      ],380+i*55,280,'cubic-bezier(.2,.8,.3,1)');
+    }
+    // 500-820: white glint, clipped to tile.
+    animate('sweep',[
+      {opacity:0,transform:'translateX(-210px)'},
+      {opacity:1,transform:'translateX(-90px)',offset:.18},
+      {opacity:1,transform:'translateX(470px)',offset:.8},
+      {opacity:0,transform:'translateX(650px)'}
+    ],500,320,'linear');
+    // 750-1030: final dot drop and bounce. Hold until 1120.
+    animate('idot',[
+      {opacity:0,transform:'translateY(-125px) rotate(-28deg) scale(.7)'},
+      {opacity:1,transform:'translateY(5px) rotate(7deg) scale(1.12,.8)',offset:.48},
+      {transform:'translateY(-19px) rotate(-6deg) scale(.94,1.06)',offset:.7},
+      {transform:'translateY(0) rotate(0) scale(1)'}
+    ],750,280,'cubic-bezier(.3,.65,.4,1)');
+    const bounds = $('zoom').getBoundingClientRect();
+    const unit = Math.min(bounds.width / 696, bounds.height / 960);
+    $('zoom').style.transformOrigin = `${bounds.width/2}px ${bounds.height/2 - 135*unit}px`;
+    // 1120–1280 ms: Geri çekilme. 1280–1900 ms: Büyüyerek kaybolma.
+    animate('zoom', [
+      {transform:'scale(1)', opacity:1, offset:0, easing:'ease-in-out'},
+      {transform:'scale(.94)', opacity:1, offset:160/780, easing:'cubic-bezier(.5,0,.75,.25)'},
+      {transform:'scale(5)', opacity:0}
+    ], 1120, 780, 'linear');
+    animate('app', [
+      {opacity:0, transform:'scale(1.025)'},
+      {opacity:1, transform:'scale(1)'}
+    ], 1500, 400, 'cubic-bezier(.2,.7,.2,1)');
+  }
+  $('replay').addEventListener('click', () => play());
+  $('slow').addEventListener('click', () => play(.35));
+  reduced.addEventListener('change', () => play());
+  // Font/ağ beklemesi 1,9 saniyelik açılışı geciktirmez.
+  if (document.fonts) document.fonts.ready.then(() => {
+    placeDot();
+    document.querySelectorAll('.glyphClip rect').forEach((rect,i) => {
+      const b=$('wordText').getExtentOfChar(i);
+      for(const [k,v] of Object.entries({x:b.x,y:b.y-8,width:b.width,height:b.height+16})) rect.setAttribute(k,v);
+    });
+  });
+  play();
+})();
+</script>
+</html>
