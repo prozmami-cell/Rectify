@@ -724,7 +724,7 @@ async function kaydet() {
       yeni ? "success" : "info", { duration: 4 });
   } catch (e) {
     kUyari(e?.name === "QuotaExceededError" ? "Cihazda yer kalmadı. Eski fotoğrafları yedekleyip silmen gerekebilir." : "Kaydedilemedi. Tekrar dene.");
-    adaBildir("Fiş kaydedilemedi", e?.name === "QuotaExceededError" ? "Cihazda yer kalmadı" : (e?.message || "Tekrar dene"), "error");
+    adaBildir("Fiş kaydedilemedi", e?.name === "QuotaExceededError" ? "Cihazda yer kalmadı" : "Tekrar dene", "error");
   } finally {
     btn.disabled = false; btn.lastChild.textContent = st.form?.kayit ? "Değişiklikleri kaydet" : "Kasaya kaydet";
   }
@@ -747,7 +747,8 @@ async function silVeyaCikar() {
 }
 
 /* ---------- Dosya verme (telefonda paylaş, bilgisayarda indir) ---------- */
-async function dosyaVer(blob, ad, tip) {
+// adaMesaj: Ada'ya giden sabit metin; dosya adı kasa adını içerdiği için gönderilmez.
+async function dosyaVer(blob, ad, tip, adaMesaj) {
   const file = new File([blob], ad, { type: tip });
   if (!masaustu() && navigator.canShare?.({ files: [file] })) {
     try { await navigator.share({ files: [file], title: ad }); return; }
@@ -758,7 +759,7 @@ async function dosyaVer(blob, ad, tip) {
   document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 10000);
   toast("İndirildi: " + ad);
-  adaBildir("İndirildi", ad, "success", { duration: 3.5 });
+  adaBildir(adaMesaj, "", "success", { duration: 3.5 });
 }
 
 /* ---------- Excel ---------- */
@@ -857,7 +858,7 @@ async function excelOlustur() {
 async function excelIndir(btn) {
   if (!window.ExcelJS) { toast("Excel aracı yükleniyor, birkaç saniye sonra tekrar dene."); return; }
   btn.disabled = true;
-  try { const b = await excelOlustur(); await dosyaVer(b, dosyaAdi(trUpper(st.kasaAdi)) + ".xlsx", b.type); }
+  try { const b = await excelOlustur(); await dosyaVer(b, dosyaAdi(trUpper(st.kasaAdi)) + ".xlsx", b.type, "Excel kasa dosyası indirildi"); }
   catch { toast("Excel oluşturulamadı."); }
   finally { btn.disabled = false; }
 }
@@ -878,7 +879,7 @@ async function fotolarZip(btn) {
       adet++;
     }
     if (!adet) { toast(ayAdi(st.ay) + " için fiş fotoğrafı yok."); return; }
-    await dosyaVer(await zip.generateAsync({ type: "blob" }), dosyaAdi(trUpper(st.kasaAdi) + " " + sayfaAdi(st.ay) + " FİŞLER") + ".zip", "application/zip");
+    await dosyaVer(await zip.generateAsync({ type: "blob" }), dosyaAdi(trUpper(st.kasaAdi) + " " + sayfaAdi(st.ay) + " FİŞLER") + ".zip", "application/zip", "Fiş fotoğrafları indirildi");
   } catch { toast("Fotoğraflar hazırlanamadı."); }
   finally { btn.disabled = false; }
 }
@@ -896,7 +897,7 @@ async function yedekAl(btn) {
       kayitlar.push({ ...k, foto });
     }
     zip.file("kasa.json", JSON.stringify({ kasaAdi: st.kasaAdi, kayitlar }, null, 2));
-    await dosyaVer(await zip.generateAsync({ type: "blob" }), dosyaAdi(trUpper(st.kasaAdi)) + " RECIFY YEDEK " + tarihTR(bugun()) + ".zip", "application/zip");
+    await dosyaVer(await zip.generateAsync({ type: "blob" }), dosyaAdi(trUpper(st.kasaAdi)) + " RECIFY YEDEK " + tarihTR(bugun()) + ".zip", "application/zip", "Yedek indirildi");
   } catch { toast("Yedek hazırlanamadı."); }
   finally { btn.disabled = false; }
 }
@@ -938,7 +939,7 @@ async function iceAktar(file) {
   } catch (e) {
     toast("İçe aktarılamadı: " + (e.message || "dosya okunamadı."), 6000);
     adaKesin("ice-aktar", "/progress", { id: "ice-aktar", title: "İçe aktarılamadı", done: true, failed: true,
-      body: e.message || "Dosya okunamadı" });
+      body: "Dosya okunamadı" }); // ham hata (ör. JSON.parse) yedeğin içeriğinden kesit içerebilir; Ada'ya gönderilmez
   }
 }
 
