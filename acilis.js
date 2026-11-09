@@ -121,7 +121,7 @@
   }
 
   function oynat() {
-    if (bitti) return;
+    if (bitti || !perde.isConnected) return;
     placeDot();
     harfler();
     const t0 = document.timeline.currentTime;

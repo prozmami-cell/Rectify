@@ -68,17 +68,45 @@ function banner(msg) { $("#banner").textContent = msg || ""; $("#banner").hidden
 
 /* ---------- Dinamik Ada (bilgisayardaki bildirim adası) ---------- */
 // Recify bilgisayarın tarayıcısında açıkken önemli olayları ekranın üstündeki Dinamik Ada'ya da gönderir.
-// Telefonda hiçbir şey yapmaz. Ada kapalıysa istek sessizce düşer ve 1 dk boyunca tekrar denenmez.
-const ADA = { adres: "http://127.0.0.1:51770", acik: !/iPhone|iPad|iPod|Android/i.test(navigator.userAgent), bekle: 0 };
+// Yalnızca kullanıcı Ayarlar'dan açarsa çalışır (varsayılan kapalı); telefonda hiç çalışmaz.
+// Ada, 127.0.0.1:51770'i dinleyen yerel bir uygulama ve kimliği doğrulanamıyor; bu yüzden firma, tutar
+// gibi finansal ayrıntılar gönderilmez. Ada kapalıysa istek sessizce düşer ve 1 dk boyunca tekrar denenmez.
+const ADA = { adres: "http://127.0.0.1:51770", masaustu: !/iPhone|iPad|iPod|Android/i.test(navigator.userAgent), bekle: 0, bekleyen: new Map(), zamanlayici: 0 };
+const adaAcikMi = () => { try { return ADA.masaustu && localStorage.getItem("recify.ada") === "1"; } catch { return false; } };
+function adaAyarla(acik) {
+  try { localStorage.setItem("recify.ada", acik ? "1" : "0"); } catch { /* tarayıcı izin vermiyorsa kapalı kalır */ }
+  if (!acik) { ADA.bekleyen.clear(); clearTimeout(ADA.zamanlayici); }
+  ADA.bekle = 0;
+}
+// true: gönderildi, false: denendi ama olmadı, null: kapalı ya da bekleme süresinde (denenmedi)
 function ada(yol, veri) {
-  if (!ADA.acik || Date.now() < ADA.bekle) return;
+  if (!adaAcikMi() || Date.now() < ADA.bekle) return Promise.resolve(null);
   const ctl = new AbortController(); setTimeout(() => ctl.abort(), 1500);
-  fetch(ADA.adres + yol, {
+  return fetch(ADA.adres + yol, {
     method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ app: "Recify", ...veri }), signal: ctl.signal,
-  }).then((r) => { if (!r.ok) ADA.bekle = Date.now() + 60000; })
-    .catch(() => { ADA.bekle = Date.now() + 60000; });
+  }).then((r) => { if (!r.ok) ADA.bekle = Date.now() + 60000; return r.ok; })
+    .catch(() => { ADA.bekle = Date.now() + 60000; return false; });
 }
+// İlerleme çubuğunu kapatan bitiş mesajları kaybolmasın: gönderilemezse bağlantı dönünce yeniden denenir
+// (en fazla 6 deneme, yaklaşık 6 dk). Aynı kimlikle yeni bir ilerleme başlarsa bekleyen bitiş iptal edilir.
+function adaKesin(id, yol, veri) {
+  ADA.bekleyen.set(id, { yol, veri, deneme: 0 });
+  adaBekleyenleriGonder();
+}
+function adaBekleyenleriGonder() {
+  clearTimeout(ADA.zamanlayici);
+  for (const [id, k] of ADA.bekleyen) {
+    ada(k.yol, k.veri).then((ok) => {
+      if (ADA.bekleyen.get(id) !== k) return;
+      if (ok === false) k.deneme++;
+      if (ok || k.deneme >= 6 || !adaAcikMi()) { ADA.bekleyen.delete(id); return; }
+      clearTimeout(ADA.zamanlayici);
+      ADA.zamanlayici = setTimeout(adaBekleyenleriGonder, Math.max(1000, ADA.bekle - Date.now() + 50));
+    });
+  }
+}
+function adaIlerleme(id, veri) { ADA.bekleyen.delete(id); ada("/progress", { id, ...veri }); }
 const adaBildir = (title, body = "", type = "info", ek = {}) => ada("/notify", { title, body, type, ...ek });
 function adaOkuma() {
   // fiş okuma kuyruğu -> adada ilerleme çubuğu, bitince "onay bekliyor" bildirimi
@@ -86,13 +114,16 @@ function adaOkuma() {
   const bekleyen = st.kuyruk.filter((o) => o.durum === "sirada" || o.durum === "okunuyor").length;
   if (bekleyen) {
     adaOkuma.aktif = true;
-    ada("/progress", { id: "fis-okuma", title: "Fişler okunuyor", progress: (toplam - bekleyen) / toplam,
-      body: `${toplam - bekleyen} / ${toplam}` });
+    adaIlerleme("fis-okuma", { title: "Fişler okunuyor", progress: (toplam - bekleyen) / toplam, body: `${toplam - bekleyen} / ${toplam}` });
   } else if (adaOkuma.aktif) {
     adaOkuma.aktif = false;
+    if (!toplam) {
+      adaKesin("fis-okuma", "/progress", { id: "fis-okuma", title: "Fiş okuma durduruldu", done: true, body: "Bekleyen fiş kalmadı" });
+      return;
+    }
     const hazir = st.kuyruk.filter((o) => o.durum === "hazir").length;
     const hatali = st.kuyruk.filter((o) => o.durum === "hata").length;
-    ada("/progress", { id: "fis-okuma", title: "Fişler okundu", done: true, failed: !hazir && hatali > 0,
+    adaKesin("fis-okuma", "/progress", { id: "fis-okuma", title: "Fişler okundu", done: true, failed: !hazir && hatali > 0,
       body: `${hazir} fiş onay bekliyor` + (hatali ? ` · ${hatali} okunamadı` : "") });
   }
 }
@@ -475,7 +506,12 @@ function cizAyarlar() {
     <section class="kart">
       <h2>Fiş okuma</h2>
       <p class="not">Fişler bu cihazın içinde okunur; fotoğraflar hiçbir yere gönderilmez. İlk okumada okuma motoru bir kez indirilir (yaklaşık 5 MB). Okunan alanları kaydetmeden önce kontrol et; emin olunamayanlar turuncu görünür.</p>
-    </section>`;
+    </section>
+    ${ADA.masaustu ? `<section class="kart">
+      <h2>Dinamik Ada bildirimleri</h2>
+      <label style="display:flex;align-items:center;gap:10px;font-weight:700;cursor:pointer"><input type="checkbox" id="adaAcik" ${adaAcikMi() ? "checked" : ""} style="width:20px;height:20px">Bildirimleri bu bilgisayardaki Dinamik Ada'ya gönder</label>
+      <p class="not">Fiş okuma ilerlemesi, kayıt ve indirme bildirimleri ekranın üstündeki adada görünür. Firma adı ve tutar gibi bilgiler gönderilmez. Ada uygulaması çalışmıyorsa bu ayarın etkisi olmaz.</p>
+    </section>` : ""}`;
 }
 
 /* ---------- Fotoğraf ve okuma kuyruğu ---------- */
@@ -544,6 +580,8 @@ function kuyruktanCikar(oge) {
   st.kuyruk = st.kuyruk.filter((o) => o !== oge);
   URL.revokeObjectURL(oge.url);
   kuyrukCiz();
+  // Sıradaki son fiş çıkarıldıysa Ada'daki ilerleme açık kalmasın
+  adaOkuma();
 }
 
 /* ---------- Fişi kontrol et ---------- */
@@ -681,7 +719,8 @@ async function kaydet() {
     st.ay = ayKey(tarih);
     await yukle();
     toast(yeni ? "Kasaya eklendi" : "Kayıt güncellendi");
-    adaBildir(yeni ? "Kasaya eklendi" : "Kayıt güncellendi", `${trUpper(firma)} · ${tl(t2)} · ${tarihTR(tarih)}`,
+    // Ada'ya firma ve tutar gönderilmez (bkz. Dinamik Ada notu)
+    adaBildir(yeni ? "Kasaya eklendi" : "Kayıt güncellendi", tarihTR(tarih),
       yeni ? "success" : "info", { duration: 4 });
   } catch (e) {
     kUyari(e?.name === "QuotaExceededError" ? "Cihazda yer kalmadı. Eski fotoğrafları yedekleyip silmen gerekebilir." : "Kaydedilemedi. Tekrar dene.");
@@ -874,7 +913,7 @@ async function iceAktar(file) {
     let eklenen = 0, atlanan = 0;
     for (const [i, k] of (veri.kayitlar || []).entries()) {
       toast(`Aktarılıyor: ${i + 1} / ${veri.kayitlar.length}`, 60000);
-      if (i % 5 === 0) ada("/progress", { id: "ice-aktar", title: "Yedek içe aktarılıyor", progress: i / veri.kayitlar.length,
+      if (i % 5 === 0) adaIlerleme("ice-aktar", { title: "Yedek içe aktarılıyor", progress: i / veri.kayitlar.length,
         body: `${i + 1} / ${veri.kayitlar.length}` });
       if (!/^\d{4}-\d{2}-\d{2}$/.test(k.tarih || "") || var_.has(anahtar(k))) { atlanan++; continue; }
       let foto = null;
@@ -894,11 +933,11 @@ async function iceAktar(file) {
     st.ay = null;
     await yukle();
     toast(`${eklenen} kayıt aktarıldı${atlanan ? `, ${atlanan} kayıt zaten vardı` : ""}.`, 5000);
-    ada("/progress", { id: "ice-aktar", title: "Yedek içe aktarıldı", done: true,
+    adaKesin("ice-aktar", "/progress", { id: "ice-aktar", title: "Yedek içe aktarıldı", done: true,
       body: `${eklenen} kayıt eklendi${atlanan ? ` · ${atlanan} zaten vardı` : ""}` });
   } catch (e) {
     toast("İçe aktarılamadı: " + (e.message || "dosya okunamadı."), 6000);
-    ada("/progress", { id: "ice-aktar", title: "İçe aktarılamadı", done: true, failed: true,
+    adaKesin("ice-aktar", "/progress", { id: "ice-aktar", title: "İçe aktarılamadı", done: true, failed: true,
       body: e.message || "Dosya okunamadı" });
   }
 }
@@ -938,6 +977,9 @@ function olaylariBagla() {
   document.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && e.target.matches("tr[data-kayit]")) e.target.click();
     if (e.key === "Escape" && st.form) kontrolKapat();
+  });
+  document.addEventListener("change", (e) => {
+    if (e.target.id === "adaAcik") { adaAyarla(e.target.checked); toast(e.target.checked ? "Dinamik Ada bildirimleri açıldı" : "Dinamik Ada bildirimleri kapatıldı"); }
   });
   document.addEventListener("input", (e) => {
     if (e.target.id === "masaAra" || e.target.id === "fisAra") { st.ara = e.target.value; aramayiYenile(); }
