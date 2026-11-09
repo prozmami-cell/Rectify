@@ -66,6 +66,37 @@ function toast(msg, sure = 3200) {
 }
 function banner(msg) { $("#banner").textContent = msg || ""; $("#banner").hidden = !msg; }
 
+/* ---------- Dinamik Ada (bilgisayardaki bildirim adası) ---------- */
+// Recify bilgisayarın tarayıcısında açıkken önemli olayları ekranın üstündeki Dinamik Ada'ya da gönderir.
+// Telefonda hiçbir şey yapmaz. Ada kapalıysa istek sessizce düşer ve 1 dk boyunca tekrar denenmez.
+const ADA = { adres: "http://127.0.0.1:51770", acik: !/iPhone|iPad|iPod|Android/i.test(navigator.userAgent), bekle: 0 };
+function ada(yol, veri) {
+  if (!ADA.acik || Date.now() < ADA.bekle) return;
+  const ctl = new AbortController(); setTimeout(() => ctl.abort(), 1500);
+  fetch(ADA.adres + yol, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ app: "Recify", ...veri }), signal: ctl.signal,
+  }).then((r) => { if (!r.ok) ADA.bekle = Date.now() + 60000; })
+    .catch(() => { ADA.bekle = Date.now() + 60000; });
+}
+const adaBildir = (title, body = "", type = "info", ek = {}) => ada("/notify", { title, body, type, ...ek });
+function adaOkuma() {
+  // fiş okuma kuyruğu -> adada ilerleme çubuğu, bitince "onay bekliyor" bildirimi
+  const toplam = st.kuyruk.length;
+  const bekleyen = st.kuyruk.filter((o) => o.durum === "sirada" || o.durum === "okunuyor").length;
+  if (bekleyen) {
+    adaOkuma.aktif = true;
+    ada("/progress", { id: "fis-okuma", title: "Fişler okunuyor", progress: (toplam - bekleyen) / toplam,
+      body: `${toplam - bekleyen} / ${toplam}` });
+  } else if (adaOkuma.aktif) {
+    adaOkuma.aktif = false;
+    const hazir = st.kuyruk.filter((o) => o.durum === "hazir").length;
+    const hatali = st.kuyruk.filter((o) => o.durum === "hata").length;
+    ada("/progress", { id: "fis-okuma", title: "Fişler okundu", done: true, failed: !hazir && hatali > 0,
+      body: `${hazir} fiş onay bekliyor` + (hatali ? ` · ${hatali} okunamadı` : "") });
+  }
+}
+
 /* ---------- Cihazdaki veritabanı (IndexedDB) ---------- */
 const VT = {
   db: null,
@@ -496,7 +527,7 @@ function oku(oge) {
 }
 async function okuSimdi(oge) {
   if (!st.kuyruk.includes(oge)) return;
-  oge.durum = "okunuyor"; kuyrukCiz();
+  oge.durum = "okunuyor"; kuyrukCiz(); adaOkuma();
   if (st.form?.oge === oge) formuOgedenDoldur(oge);
   try {
     oge.sonuc = await RecifyOkuma.fisOku(oge.blob);
@@ -505,7 +536,7 @@ async function okuSimdi(oge) {
     oge.durum = "hata";
     oge.hata = e?.message || "Fiş okunamadı. Bilgileri fotoğrafa bakarak gir.";
   }
-  kuyrukCiz();
+  kuyrukCiz(); adaOkuma();
   if (st.form?.oge === oge) formuOgedenDoldur(oge);
 }
 
@@ -650,8 +681,11 @@ async function kaydet() {
     st.ay = ayKey(tarih);
     await yukle();
     toast(yeni ? "Kasaya eklendi" : "Kayıt güncellendi");
+    adaBildir(yeni ? "Kasaya eklendi" : "Kayıt güncellendi", `${trUpper(firma)} · ${tl(t2)} · ${tarihTR(tarih)}`,
+      yeni ? "success" : "info", { duration: 4 });
   } catch (e) {
     kUyari(e?.name === "QuotaExceededError" ? "Cihazda yer kalmadı. Eski fotoğrafları yedekleyip silmen gerekebilir." : "Kaydedilemedi. Tekrar dene.");
+    adaBildir("Fiş kaydedilemedi", e?.name === "QuotaExceededError" ? "Cihazda yer kalmadı" : (e?.message || "Tekrar dene"), "error");
   } finally {
     btn.disabled = false; btn.lastChild.textContent = st.form?.kayit ? "Değişiklikleri kaydet" : "Kasaya kaydet";
   }
@@ -685,6 +719,7 @@ async function dosyaVer(blob, ad, tip) {
   document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 10000);
   toast("İndirildi: " + ad);
+  adaBildir("İndirildi", ad, "success", { duration: 3.5 });
 }
 
 /* ---------- Excel ---------- */
@@ -839,6 +874,8 @@ async function iceAktar(file) {
     let eklenen = 0, atlanan = 0;
     for (const [i, k] of (veri.kayitlar || []).entries()) {
       toast(`Aktarılıyor: ${i + 1} / ${veri.kayitlar.length}`, 60000);
+      if (i % 5 === 0) ada("/progress", { id: "ice-aktar", title: "Yedek içe aktarılıyor", progress: i / veri.kayitlar.length,
+        body: `${i + 1} / ${veri.kayitlar.length}` });
       if (!/^\d{4}-\d{2}-\d{2}$/.test(k.tarih || "") || var_.has(anahtar(k))) { atlanan++; continue; }
       let foto = null;
       if (k.foto && zip.file(k.foto)) {
@@ -857,8 +894,12 @@ async function iceAktar(file) {
     st.ay = null;
     await yukle();
     toast(`${eklenen} kayıt aktarıldı${atlanan ? `, ${atlanan} kayıt zaten vardı` : ""}.`, 5000);
+    ada("/progress", { id: "ice-aktar", title: "Yedek içe aktarıldı", done: true,
+      body: `${eklenen} kayıt eklendi${atlanan ? ` · ${atlanan} zaten vardı` : ""}` });
   } catch (e) {
     toast("İçe aktarılamadı: " + (e.message || "dosya okunamadı."), 6000);
+    ada("/progress", { id: "ice-aktar", title: "İçe aktarılamadı", done: true, failed: true,
+      body: e.message || "Dosya okunamadı" });
   }
 }
 
