@@ -905,10 +905,14 @@ async function yedekAl(btn) {
 async function iceAktar(file) {
   if (!window.JSZip) { toast("Arşiv aracı yükleniyor, birkaç saniye sonra tekrar dene."); return; }
   try {
-    const zip = await JSZip.loadAsync(file);
+    // Kullanıcıya gösterilecek anlaşılır mesajlar (teknik hata ayrıntısı gösterilmez)
+    const hata = (kullanici) => Object.assign(new Error(kullanici), { kullanici });
+    const zip = await JSZip.loadAsync(file).catch(() => { throw hata("Bu dosya bir yedek dosyası değil. Recify'dan aldığın .zip yedeğini seç."); });
     const json = zip.file("kasa.json");
-    if (!json) throw new Error("Bu dosya bir Recify yedeği değil.");
-    const veri = JSON.parse(await json.async("string"));
+    if (!json) throw hata("Bu .zip dosyası bir Recify yedeği değil.");
+    let veri;
+    try { veri = JSON.parse(await json.async("string")); } catch { veri = null; }
+    if (!veri || !Array.isArray(veri.kayitlar)) throw hata("Yedek dosyası bozuk, açılamadı. Yedeği yeniden alıp tekrar dene.");
     const anahtar = (k) => [k.tarih, trUpper(k.firma || ""), k.evrakNo || "", (sayi(k.gelen) || sayi(k.nakit) || sayi(k.kart)).toFixed(2)].join("|");
     const var_ = new Set((await VT.hepsi("kayitlar")).map(anahtar));
     let eklenen = 0, atlanan = 0;
@@ -937,7 +941,9 @@ async function iceAktar(file) {
     adaKesin("ice-aktar", "/progress", { id: "ice-aktar", title: "Yedek içe aktarıldı", done: true,
       body: `${eklenen} kayıt eklendi${atlanan ? ` · ${atlanan} zaten vardı` : ""}` });
   } catch (e) {
-    toast("İçe aktarılamadı: " + (e.message || "dosya okunamadı."), 6000);
+    toast(e?.kullanici || (e?.name === "QuotaExceededError"
+      ? "Cihazda yer kalmadı. Eski fotoğrafları yedekleyip silmen gerekebilir."
+      : "Yedek içe aktarılamadı. Dosyayı kontrol edip tekrar dene."), 6000);
     adaKesin("ice-aktar", "/progress", { id: "ice-aktar", title: "İçe aktarılamadı", done: true, failed: true,
       body: "Dosya okunamadı" }); // ham hata (ör. JSON.parse) yedeğin içeriğinden kesit içerebilir; Ada'ya gönderilmez
   }
